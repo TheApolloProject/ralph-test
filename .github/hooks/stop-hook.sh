@@ -18,8 +18,6 @@ fi
 FRONTMATTER=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$RALPH_STATE_FILE")
 ITERATION=$(echo "$FRONTMATTER" | grep '^iteration:' | sed 's/iteration: *//')
 MAX_ITERATIONS=$(echo "$FRONTMATTER" | grep '^max_iterations:' | sed 's/max_iterations: *//')
-# Extract completion_promise and strip surrounding quotes if present
-COMPLETION_PROMISE=$(echo "$FRONTMATTER" | grep '^completion_promise:' | sed 's/completion_promise: *//' | sed 's/^"\(.*\)"$/\1/')
 
 # Validate numeric fields before arithmetic operations
 if [[ ! "$ITERATION" =~ ^[0-9]+$ ]]; then
@@ -51,24 +49,14 @@ if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
   exit 0
 fi
 
-# Check for completion promise (only if set)
-if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  # Check if promise.md file exists in workspace
-  PROMISE_FILE="promise.md"
-  
-  if [[ -f "$PROMISE_FILE" ]]; then
-    # Read and normalize the promise file content (trim whitespace)
-    PROMISE_TEXT=$(cat "$PROMISE_FILE" | sed 's/^\s*//; s/\s*$//' | tr -d '\n' | sed 's/\s\+/ /g')
-    
-    # Use = for literal string comparison (not pattern matching)
-    # == in [[ ]] does glob pattern matching which breaks with *, ?, [ characters
-    if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
-      echo "✅ Ralph loop: Detected promise.md with matching content: $COMPLETION_PROMISE"
-      rm "$RALPH_STATE_FILE"
-      rm "$PROMISE_FILE"  # Clean up the promise file
-      exit 0
-    fi
-  fi
+# Check for completion file
+COMPLETED_FILE="COMPLETED.md"
+
+if [[ -f "$COMPLETED_FILE" ]]; then
+  echo "✅ Ralph loop: Detected COMPLETED.md - stopping loop"
+  rm "$RALPH_STATE_FILE"
+  rm "$COMPLETED_FILE"  # Clean up the completion file
+  exit 0
 fi
 
 # Not complete - continue loop with SAME PROMPT
@@ -99,12 +87,8 @@ TEMP_FILE="${RALPH_STATE_FILE}.tmp.$$"
 sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$RALPH_STATE_FILE" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$RALPH_STATE_FILE"
 
-# Build system message with iteration count and completion promise info
-if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  SYSTEM_MSG="🔄 Ralph iteration $NEXT_ITERATION | To stop: create promise.md containing '$COMPLETION_PROMISE' (ONLY when statement is TRUE - do not lie to exit!)"
-else
-  SYSTEM_MSG="🔄 Ralph iteration $NEXT_ITERATION | No completion promise set - loop runs infinitely"
-fi
+# Build system message with iteration count
+SYSTEM_MSG="🔄 Ralph iteration $NEXT_ITERATION | To stop: create COMPLETED.md file"
 
 # Output JSON to block the stop and feed prompt back
 # The "reason" field contains the prompt that will be sent back to Claude

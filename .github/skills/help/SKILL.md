@@ -1,6 +1,7 @@
 ---
 name: help
 description: "Explain Ralph Wiggum technique and available commands"
+disable-model-invocation: true
 ---
 
 # Ralph Wiggum Plugin Help
