@@ -6,9 +6,6 @@
 
 set -euo pipefail
 
-# Read hook input from stdin (advanced stop hook API)
-HOOK_INPUT=$(cat)
-
 # Check if ralph-loop is active
 RALPH_STATE_FILE=".claude/ralph-loop.local.md"
 
@@ -54,76 +51,23 @@ if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
   exit 0
 fi
 
-# Get transcript path from hook input
-TRANSCRIPT_PATH=$(echo "$HOOK_INPUT" | jq -r '.transcript_path')
-
-if [[ ! -f "$TRANSCRIPT_PATH" ]]; then
-  echo "⚠️  Ralph loop: Transcript file not found" >&2
-  echo "   Expected: $TRANSCRIPT_PATH" >&2
-  echo "   This is unusual and may indicate a Claude Code internal issue." >&2
-  echo "   Ralph loop is stopping." >&2
-  rm "$RALPH_STATE_FILE"
-  exit 0
-fi
-
-# Read last assistant message from transcript (JSONL format - one JSON per line)
-# First check if there are any assistant messages
-if ! grep -q '"role":"assistant"' "$TRANSCRIPT_PATH"; then
-  echo "⚠️  Ralph loop: No assistant messages found in transcript" >&2
-  echo "   Transcript: $TRANSCRIPT_PATH" >&2
-  echo "   This is unusual and may indicate a transcript format issue" >&2
-  echo "   Ralph loop is stopping." >&2
-  rm "$RALPH_STATE_FILE"
-  exit 0
-fi
-
-# Extract last assistant message with explicit error handling
-LAST_LINE=$(grep '"role":"assistant"' "$TRANSCRIPT_PATH" | tail -1)
-if [[ -z "$LAST_LINE" ]]; then
-  echo "⚠️  Ralph loop: Failed to extract last assistant message" >&2
-  echo "   Ralph loop is stopping." >&2
-  rm "$RALPH_STATE_FILE"
-  exit 0
-fi
-
-# Parse JSON with error handling
-LAST_OUTPUT=$(echo "$LAST_LINE" | jq -r '
-  .message.content |
-  map(select(.type == "text")) |
-  map(.text) |
-  join("\n")
-' 2>&1)
-
-# Check if jq succeeded
-if [[ $? -ne 0 ]]; then
-  echo "⚠️  Ralph loop: Failed to parse assistant message JSON" >&2
-  echo "   Error: $LAST_OUTPUT" >&2
-  echo "   This may indicate a transcript format issue" >&2
-  echo "   Ralph loop is stopping." >&2
-  rm "$RALPH_STATE_FILE"
-  exit 0
-fi
-
-if [[ -z "$LAST_OUTPUT" ]]; then
-  echo "⚠️  Ralph loop: Assistant message contained no text content" >&2
-  echo "   Ralph loop is stopping." >&2
-  rm "$RALPH_STATE_FILE"
-  exit 0
-fi
-
 # Check for completion promise (only if set)
 if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  # Extract text from <promise> tags using Perl for multiline support
-  # -0777 slurps entire input, s flag makes . match newlines
-  # .*? is non-greedy (takes FIRST tag), whitespace normalized
-  PROMISE_TEXT=$(echo "$LAST_OUTPUT" | perl -0777 -pe 's/.*?<promise>(.*?)<\/promise>.*/$1/s; s/^\s+|\s+$//g; s/\s+/ /g' 2>/dev/null || echo "")
-
-  # Use = for literal string comparison (not pattern matching)
-  # == in [[ ]] does glob pattern matching which breaks with *, ?, [ characters
-  if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
-    echo "✅ Ralph loop: Detected <promise>$COMPLETION_PROMISE</promise>"
-    rm "$RALPH_STATE_FILE"
-    exit 0
+  # Check if promise.md file exists in workspace
+  PROMISE_FILE="promise.md"
+  
+  if [[ -f "$PROMISE_FILE" ]]; then
+    # Read and normalize the promise file content (trim whitespace)
+    PROMISE_TEXT=$(cat "$PROMISE_FILE" | sed 's/^\s*//; s/\s*$//' | tr -d '\n' | sed 's/\s\+/ /g')
+    
+    # Use = for literal string comparison (not pattern matching)
+    # == in [[ ]] does glob pattern matching which breaks with *, ?, [ characters
+    if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$COMPLETION_PROMISE" ]]; then
+      echo "✅ Ralph loop: Detected promise.md with matching content: $COMPLETION_PROMISE"
+      rm "$RALPH_STATE_FILE"
+      rm "$PROMISE_FILE"  # Clean up the promise file
+      exit 0
+    fi
   fi
 fi
 
@@ -157,7 +101,7 @@ mv "$TEMP_FILE" "$RALPH_STATE_FILE"
 
 # Build system message with iteration count and completion promise info
 if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  SYSTEM_MSG="🔄 Ralph iteration $NEXT_ITERATION | To stop: output <promise>$COMPLETION_PROMISE</promise> (ONLY when statement is TRUE - do not lie to exit!)"
+  SYSTEM_MSG="🔄 Ralph iteration $NEXT_ITERATION | To stop: create promise.md containing '$COMPLETION_PROMISE' (ONLY when statement is TRUE - do not lie to exit!)"
 else
   SYSTEM_MSG="🔄 Ralph iteration $NEXT_ITERATION | No completion promise set - loop runs infinitely"
 fi
