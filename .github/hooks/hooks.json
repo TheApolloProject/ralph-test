@@ -4,7 +4,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "./stop-hook.sh"
+        "command": ".github/hooks/stop-hook.sh"
     }
     ]
   }
