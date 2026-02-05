@@ -8,9 +8,13 @@ set -euo pipefail
 
 # Check if ralph-loop is active
 RALPH_STATE_FILE=".claude/ralph-loop.local.md"
+COMPLETED_FILE="COMPLETED.md"
 
 if [[ ! -f "$RALPH_STATE_FILE" ]]; then
-  # No active loop - allow exit
+  # No active loop - clean up any stale COMPLETED.md and allow exit
+  if [[ -f "$COMPLETED_FILE" ]]; then
+    rm "$COMPLETED_FILE"
+  fi
   exit 0
 fi
 
@@ -53,9 +57,6 @@ fi
 
 # Check for completion promise (only if set)
 if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
-  # Check if COMPLETED.md file exists in workspace
-  COMPLETED_FILE="COMPLETED.md"
-  
   if [[ -f "$COMPLETED_FILE" ]]; then
     # Read and normalize the file content (trim whitespace)
     # Use POSIX character classes for macOS/BSD sed compatibility
