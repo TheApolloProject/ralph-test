@@ -58,7 +58,8 @@ if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
   
   if [[ -f "$COMPLETED_FILE" ]]; then
     # Read and normalize the file content (trim whitespace)
-    COMPLETED_TEXT=$(cat "$COMPLETED_FILE" | sed 's/^\s*//; s/\s*$//' | tr -d '\n' | sed 's/\s\+/ /g')
+    # Use POSIX character classes for macOS/BSD sed compatibility
+    COMPLETED_TEXT=$(cat "$COMPLETED_FILE" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | tr -d '\n' | sed 's/[[:space:]][[:space:]]*/ /g')
     
     # Use = for literal string comparison (not pattern matching)
     if [[ -n "$COMPLETED_TEXT" ]] && [[ "$COMPLETED_TEXT" = "$COMPLETION_PROMISE" ]]; then
