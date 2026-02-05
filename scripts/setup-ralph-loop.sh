@@ -32,7 +32,7 @@ DESCRIPTION:
   Starts a Ralph Wiggum loop in your CURRENT session. The stop hook prevents
   exit and feeds your output back as input until completion or iteration limit.
 
-  To signal completion, you must output: <promise>YOUR_PHRASE</promise>
+  To signal completion, create COMPLETED.md with your promise phrase.
 
   Use this for:
   - Interactive iteration where you want to see progress
@@ -182,22 +182,21 @@ if [[ "$COMPLETION_PROMISE" != "null" ]]; then
   echo "CRITICAL - Ralph Loop Completion Promise"
   echo "═══════════════════════════════════════════════════════════"
   echo ""
-  echo "To complete this loop, output this EXACT text:"
-  echo "  <promise>$COMPLETION_PROMISE</promise>"
+  echo "To complete this loop, create a file called COMPLETED.md"
+  echo "containing EXACTLY this text:"
+  echo "  $COMPLETION_PROMISE"
   echo ""
   echo "STRICT REQUIREMENTS (DO NOT VIOLATE):"
-  echo "  ✓ Use <promise> XML tags EXACTLY as shown above"
+  echo "  ✓ File must be named COMPLETED.md in the workspace root"
+  echo "  ✓ Content must match the promise text EXACTLY"
   echo "  ✓ The statement MUST be completely and unequivocally TRUE"
-  echo "  ✓ Do NOT output false statements to exit the loop"
+  echo "  ✓ Do NOT create this file with false statements"
   echo "  ✓ Do NOT lie even if you think you should exit"
   echo ""
   echo "IMPORTANT - Do not circumvent the loop:"
   echo "  Even if you believe you're stuck, the task is impossible,"
-  echo "  or you've been running too long - you MUST NOT output a"
-  echo "  false promise statement. The loop is designed to continue"
-  echo "  until the promise is GENUINELY TRUE. Trust the process."
-  echo ""
-  echo "  If the loop should stop, the promise statement will become"
-  echo "  true naturally. Do not force it by lying."
+  echo "  or you've been running too long - you MUST NOT write a"
+  echo "  false promise to COMPLETED.md. The loop is designed to"
+  echo "  continue until the promise is GENUINELY TRUE."
   echo "═══════════════════════════════════════════════════════════"
 fi

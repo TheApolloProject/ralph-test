@@ -77,13 +77,14 @@ Cancel an active Ralph loop (removes the loop state file).
 
 ### Completion Promises
 
-To signal completion, Claude must output a `<promise>` tag:
+To signal completion, Claude must create a file called `COMPLETED.md` in the workspace root containing the exact promise text:
 
 ```
-<promise>TASK COMPLETE</promise>
+# In COMPLETED.md:
+TASK COMPLETE
 ```
 
-The stop hook looks for this specific tag. Without it (or `--max-iterations`), Ralph runs infinitely.
+The stop hook checks for this file and validates its content matches the promise. Without it (or `--max-iterations`), Ralph runs infinitely.
 
 ### Self-Reference Mechanism
 
@@ -98,7 +99,7 @@ The "loop" doesn't mean Claude talks to itself. It means:
 ### Interactive Bug Fix
 
 ```
-/ralph-loop "Fix the token refresh logic in auth.ts. Output <promise>FIXED</promise> when all tests pass." --completion-promise "FIXED" --max-iterations 10
+/ralph-loop "Fix the token refresh logic in auth.ts. Write 'FIXED' to COMPLETED.md when all tests pass." --completion-promise "FIXED" --max-iterations 10
 ```
 
 You'll see Ralph:
