@@ -7,6 +7,9 @@ disable-model-invocation: true
 
 # Ralph Loop Command
 
+IMPORTANT, DO NOT SKIP THIS.
+The user will give you text after saying "Follow instructions in SKILL.md". Pass that text verbatim as $ARGUMENTS below.
+
 Execute the setup script to initialize the Ralph loop:
 
 ```!
