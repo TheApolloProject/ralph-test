@@ -1,8 +1,12 @@
 const express = require('express');
+const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(express.json());
+
+// Serve the developer frontend from the public/ directory
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // In-memory storage for todos
 let todos = [];

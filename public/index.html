@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Todo API — Developer Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-logo">&#9650;</span>
+        <span class="header-title">Todo API</span>
+        <span class="header-subtitle">Developer Dashboard</span>
+      </div>
+      <div class="header-status">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-label" id="statusLabel">Connecting…</span>
+        <span class="status-base-url" id="statusBaseUrl"></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ── Left panel: request builder ───────────────────────── -->
+    <aside class="panel panel-left">
+      <section class="card">
+        <h2 class="card-title">New Todo</h2>
+        <form id="createForm" autocomplete="off">
+          <label class="field-label" for="newTitle">Title <span class="required">*</span></label>
+          <input
+            class="field-input"
+            id="newTitle"
+            type="text"
+            maxlength="200"
+            placeholder="What needs to be done?"
+            required
+          />
+          <label class="field-label checkbox-label">
+            <input type="checkbox" id="newCompleted" />
+            Mark as completed
+          </label>
+          <button class="btn btn-primary" type="submit">Create Todo</button>
+        </form>
+      </section>
+
+      <section class="card" id="editCard" style="display:none;">
+        <h2 class="card-title">Edit Todo</h2>
+        <form id="editForm" autocomplete="off">
+          <input type="hidden" id="editId" />
+          <label class="field-label" for="editTitle">Title</label>
+          <input
+            class="field-input"
+            id="editTitle"
+            type="text"
+            maxlength="200"
+            placeholder="Updated title"
+          />
+          <label class="field-label checkbox-label">
+            <input type="checkbox" id="editCompleted" />
+            Completed
+          </label>
+          <div class="btn-row">
+            <button class="btn btn-primary" type="submit">Save Changes</button>
+            <button class="btn btn-ghost" type="button" id="cancelEdit">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">API Reference</h2>
+        <ul class="endpoint-list">
+          <li><span class="method get">GET</span><code>/todos</code></li>
+          <li><span class="method get">GET</span><code>/todos/:id</code></li>
+          <li><span class="method post">POST</span><code>/todos</code></li>
+          <li><span class="method put">PUT</span><code>/todos/:id</code></li>
+          <li><span class="method delete">DELETE</span><code>/todos/:id</code></li>
+        </ul>
+      </section>
+    </aside>
+
+    <!-- ── Centre panel: todo list ────────────────────────────── -->
+    <main class="panel panel-main">
+      <div class="toolbar">
+        <h2 class="toolbar-title">
+          Todos
+          <span class="badge" id="todoBadge">0</span>
+        </h2>
+        <div class="toolbar-actions">
+          <label class="filter-label">
+            <input type="checkbox" id="filterPending" />
+            Pending only
+          </label>
+          <button class="btn btn-ghost btn-sm" id="refreshBtn" title="Refresh">&#8635; Refresh</button>
+        </div>
+      </div>
+
+      <div id="todoList" class="todo-list">
+        <div class="empty-state" id="emptyState">
+          <p>No todos yet. Create one to get started.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── Right panel: request / response log ───────────────── -->
+    <aside class="panel panel-right">
+      <div class="log-header">
+        <h2 class="card-title">Request / Response Log</h2>
+        <button class="btn btn-ghost btn-sm" id="clearLogBtn">Clear</button>
+      </div>
+      <div id="logEntries" class="log-entries"></div>
+    </aside>
+
+  </div>
+
+  <!-- ── Toast notification ───────────────────────────────────── -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
