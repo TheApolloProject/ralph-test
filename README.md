@@ -1,13 +1,41 @@
 # Todo API
 
-A REST API for managing todos with full CRUD operations, implemented in Python with Flask.
+A REST API for managing todos with full CRUD operations, with both Python/Flask and Node.js/Express implementations, plus a built-in developer frontend.
+
+## Developer Frontend
+
+The Node.js server (Express) automatically serves a developer dashboard at the root URL (`/`). Open a browser and navigate to `http://localhost:3000` after starting the Node.js server to access it.
+
+**Features:**
+
+- Create, view, update and delete todos through a clean UI
+- Toggle completed status with a single click
+- Filter to show only pending todos
+- Request / Response log panel showing every API call with status codes, timing and JSON bodies
+- API reference sidebar listing all available endpoints
+- Live API status indicator
 
 ## Requirements
+
+### Node.js
+
+- Node.js (LTS recommended)
+- npm
+
+### Python
 
 - Python 3.10+
 - pip
 
 ## Installation
+
+### Node.js
+
+```bash
+npm install
+```
+
+### Python
 
 1. Clone the repository and navigate to the project directory.
 
@@ -19,6 +47,16 @@ A REST API for managing todos with full CRUD operations, implemented in Python w
 
 ## Running the Server
 
+### Node.js (includes developer frontend)
+
+```bash
+npm start
+```
+
+Open `http://localhost:3000` in your browser for the developer dashboard.
+
+### Python
+
 ```bash
 cd src
 python main.py
@@ -28,9 +66,19 @@ The server starts on port **3000** by default. Set the `PORT` environment variab
 
 ```bash
 PORT=8080 python main.py
+# or
+PORT=8080 npm start
 ```
 
 ## Running the Tests
+
+### Node.js
+
+```bash
+npm test
+```
+
+### Python
 
 ```bash
 pytest tests/
@@ -191,10 +239,18 @@ curl -X DELETE http://localhost:3000/todos/3f2a1b4c-...
 
 ```
 .
+├── package.json           # Node.js project configuration
 ├── requirements.txt       # Python dependencies
+├── public/
+│   ├── index.html         # Developer dashboard (HTML)
+│   ├── styles.css         # Dashboard styles
+│   └── app.js             # Dashboard client-side JavaScript
 ├── src/
+│   ├── app.js             # Express application and route handlers
 │   ├── app.py             # Flask application and route handlers
-│   └── main.py            # Entry point (starts the server)
+│   ├── index.js           # Node.js entry point
+│   └── main.py            # Python entry point
 └── tests/
+    ├── todos.test.js      # Jest test suite
     └── test_todos.py      # pytest test suite
 ```
